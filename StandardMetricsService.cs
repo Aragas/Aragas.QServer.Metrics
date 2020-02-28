@@ -19,37 +19,44 @@ namespace Aragas.QServer.Metrics
     {
         private readonly GaugeOptions process_start_time_milliseconds = new GaugeOptions()
         {
-            Name = "Process Start Time Milliseconds",
+            Name = "start_time_milliseconds",
+            Context = "process",
             MeasurementUnit = Unit.Custom("Milliseconds")
         };
         private readonly HistogramOptions process_cpu_usage_percent = new HistogramOptions()
         {
-            Name = "Process CPU Usage Percent",
+            Name = "cpu_usage_percent",
+            Context = "process",
             MeasurementUnit = Unit.Percent
         };
         private readonly GaugeOptions process_private_memory_bytes = new GaugeOptions()
         {
-            Name = "Process Private Memory Bytes",
+            Name = "private_memory_bytes",
+            Context = "process",
             MeasurementUnit = Unit.Bytes
         };
         private readonly GaugeOptions process_working_set_bytes = new GaugeOptions()
         {
-            Name = "Process Working Set Bytes",
+            Name = "working_set_bytes",
+            Context = "process",
             MeasurementUnit = Unit.Bytes
         };
         private readonly GaugeOptions dotnet_total_memory_bytes = new GaugeOptions()
         {
-            Name = "dotnet Total Memory Bytes",
+            Name = "total_memory_bytes",
+            Context = "dotnet",
             MeasurementUnit = Unit.Bytes
         };
         private readonly CounterOptions dotnet_collection_count = new CounterOptions()
         {
-            Name = "dotnet Collection Count",
+            Name = "collection_count",
+            Context = "dotnet",
             MeasurementUnit = Unit.Items
         };
         private readonly CounterOptions dotnet_exception_count = new CounterOptions()
         {
-            Name = "dotnet Exception Count",
+            Name = "exception_count",
+            Context = "dotnet",
             MeasurementUnit = Unit.Errors
         };
 

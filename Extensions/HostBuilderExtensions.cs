@@ -10,11 +10,5 @@ namespace Microsoft.Extensions.Hosting
                 services.AddPrometheusEndpoint();
                 services.AddDefaultMetrics();
             });
-
-        public static IHostBuilder UseHealthChecks(this IHostBuilder hostBuilder) =>
-            hostBuilder .ConfigureServices((hostContext, services) =>
-            {
-                services.AddHealthCheckPublisher();
-            });
     }
 }
