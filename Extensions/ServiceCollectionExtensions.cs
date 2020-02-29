@@ -1,9 +1,11 @@
 ﻿using App.Metrics;
+using App.Metrics.DotNetRuntime;
+using App.Metrics.DotNetRuntime.BackgroundServices;
 
-using Aragas.QServer.Metrics;
 using Aragas.QServer.Metrics.BackgroundServices;
 
 using Microsoft.Extensions.DependencyInjection.Extensions;
+using Microsoft.Extensions.Logging;
 
 using System;
 
@@ -24,17 +26,23 @@ namespace Microsoft.Extensions.DependencyInjection
             metricsBuilder = additional?.Invoke(metricsBuilder) ?? metricsBuilder;
             services.AddMetrics(metricsBuilder);
 
-            services.TryAddSingleton<ICpuUsageMonitor, CpuUsageMonitor>();
-            services.AddHostedService(sp => (CpuUsageMonitor)sp.GetRequiredService<ICpuUsageMonitor>());
-
             services.AddMetricsReportingHostedService();
 
             return services;
         }
 
-        public static IServiceCollection AddDefaultMetrics(this IServiceCollection services)
+        public static IServiceCollection AddetricsCollectors(this IServiceCollection services, MetricsCollectorBuilder? builder = null)
         {
-            services.AddHostedService<StandardMetricsService>();
+            services.TryAddSingleton<ICpuUsageMonitor, CpuUsageMonitor>();
+            services.AddHostedService(sp => (CpuUsageMonitor) sp.GetRequiredService<ICpuUsageMonitor>());
+
+            if (builder == null)
+                builder = MetricsCollectorBuilder.Default();
+
+            services.AddHostedService(sp => new MetricsCollectorService(
+                sp.GetRequiredService<IMetrics>(),
+                sp.GetRequiredService<ILogger<MetricsCollectorService>>(),
+                builder.Build(sp)));
 
             return services;
         }
