@@ -11,6 +11,7 @@ using System;
 
 namespace Microsoft.Extensions.DependencyInjection
 {
+
     public static class ServiceCollectionExtensions
     {
         public static IServiceCollection AddPrometheusEndpoint(this IServiceCollection services, Func<IMetricsBuilder, IMetricsBuilder>? additional = null)
@@ -47,11 +48,11 @@ namespace Microsoft.Extensions.DependencyInjection
             return services;
         }
 
-        public static IServiceCollection AddDotNetRuntimeMetrics(this IServiceCollection services, MetricsCollectorBuilder? builder = null)
+        public static IServiceCollection AddDotNetRuntimeMetrics(this IServiceCollection services)
         {
-            services.AddSingleton(sp => DotNetRuntimeStatsBuilder
-                .Default(sp.GetRequiredService<IMetrics>())
-                .StartCollecting());
+            services.AddHostedService(sp => new DotNetService(
+                sp.GetRequiredService<IMetrics>(),
+                sp.GetRequiredService<ILogger<DotNetService>>()));
 
             return services;
         }
