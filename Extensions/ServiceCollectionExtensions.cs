@@ -31,7 +31,7 @@ namespace Microsoft.Extensions.DependencyInjection
             return services;
         }
 
-        public static IServiceCollection AddetricsCollectors(this IServiceCollection services, MetricsCollectorBuilder? builder = null)
+        public static IServiceCollection AddBuiltInMetrics(this IServiceCollection services, MetricsCollectorBuilder? builder = null)
         {
             services.TryAddSingleton<ICpuUsageMonitor, CpuUsageMonitor>();
             services.AddHostedService(sp => (CpuUsageMonitor) sp.GetRequiredService<ICpuUsageMonitor>());
@@ -43,6 +43,15 @@ namespace Microsoft.Extensions.DependencyInjection
                 sp.GetRequiredService<IMetrics>(),
                 sp.GetRequiredService<ILogger<MetricsCollectorService>>(),
                 builder.Build(sp)));
+
+            return services;
+        }
+
+        public static IServiceCollection AddDotNetRuntimeMetrics(this IServiceCollection services, MetricsCollectorBuilder? builder = null)
+        {
+            services.AddSingleton(sp => DotNetRuntimeStatsBuilder
+                .Default(sp.GetRequiredService<IMetrics>())
+                .StartCollecting());
 
             return services;
         }

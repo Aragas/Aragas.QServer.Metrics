@@ -8,7 +8,8 @@ namespace Microsoft.Extensions.Hosting
             .ConfigureServices((hostContext, services) =>
             {
                 services.AddPrometheusEndpoint();
-                services.AddetricsCollectors();
+                services.AddBuiltInMetrics();
+                services.AddDotNetRuntimeMetrics();
             });
     }
 }

@@ -16,10 +16,11 @@ namespace App.Metrics.DotNetRuntime
         public static MetricsCollectorBuilder Default()
         {
             return Customize()
-                .WithCpuUsageMetrics()
-                .WithDotNetMetrics()
+                //.WithCpuUsageMetrics()
+                //.WithDotNetMetrics()
                 .WithFirstChanceExceptionMetrics()
-                .WithProcessMetrics();
+                //.WithProcessMetrics()
+                ;
         }
 
         public static MetricsCollectorBuilder Customize()
