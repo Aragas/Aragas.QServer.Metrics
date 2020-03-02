@@ -5,7 +5,7 @@ using Aragas.QServer.Metrics.BackgroundServices;
 
 using Microsoft.Extensions.Logging;
 
-namespace Aragas.QServer.Metrics
+namespace Aragas.QServer.Metrics.MetricsCollectors
 {
     public sealed class CpuUsageMetricsCollector : IMetricsCollector
     {

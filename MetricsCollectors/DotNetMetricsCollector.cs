@@ -6,7 +6,7 @@ using Microsoft.Extensions.Logging;
 
 using System;
 
-namespace Aragas.QServer.Metrics
+namespace Aragas.QServer.Metrics.MetricsCollectors
 {
     public sealed class DotNetMetricsCollector : IMetricsCollector
     {

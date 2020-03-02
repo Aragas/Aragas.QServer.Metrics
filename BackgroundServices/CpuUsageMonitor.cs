@@ -27,7 +27,7 @@ namespace Aragas.QServer.Metrics.BackgroundServices
                 process.Refresh();
                 var startCpuUsage = process.TotalProcessorTime;
 
-                await Task.Delay(_delay);
+                await Task.Delay(_delay, stoppingToken);
 
                 var endTime = DateTime.UtcNow;
                 process.Refresh();

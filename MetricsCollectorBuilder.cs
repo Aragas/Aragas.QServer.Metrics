@@ -1,4 +1,4 @@
-﻿using Aragas.QServer.Metrics;
+﻿using Aragas.QServer.Metrics.MetricsCollectors;
 
 using Microsoft.Extensions.DependencyInjection;
 
@@ -6,7 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace App.Metrics.DotNetRuntime
+namespace Aragas.QServer.Metrics
 {
     /// <summary>
     /// Configures what .NET core runtime metrics will be collected. 

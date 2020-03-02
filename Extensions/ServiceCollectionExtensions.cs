@@ -1,11 +1,9 @@
 ﻿using App.Metrics;
-using App.Metrics.DotNetRuntime;
-using App.Metrics.DotNetRuntime.BackgroundServices;
 
+using Aragas.QServer.Metrics;
 using Aragas.QServer.Metrics.BackgroundServices;
 
 using Microsoft.Extensions.DependencyInjection.Extensions;
-using Microsoft.Extensions.Logging;
 
 using System;
 
@@ -40,19 +38,14 @@ namespace Microsoft.Extensions.DependencyInjection
             if (builder == null)
                 builder = MetricsCollectorBuilder.Default();
 
-            services.AddHostedService(sp => new MetricsCollectorService(
-                sp.GetRequiredService<IMetrics>(),
-                sp.GetRequiredService<ILogger<MetricsCollectorService>>(),
-                builder.Build(sp)));
+            services.AddHostedService(sp => ActivatorUtilities.CreateInstance<MetricsCollectorService>(sp, builder.Build(sp)));
 
             return services;
         }
 
         public static IServiceCollection AddDotNetRuntimeMetrics(this IServiceCollection services)
         {
-            services.AddHostedService(sp => new DotNetService(
-                sp.GetRequiredService<IMetrics>(),
-                sp.GetRequiredService<ILogger<DotNetService>>()));
+            services.AddHostedService(sp => ActivatorUtilities.CreateInstance<DotNetMetricsService>(sp));
 
             return services;
         }

@@ -1,4 +1,4 @@
-﻿using Aragas.QServer.Metrics;
+﻿using App.Metrics;
 
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
@@ -7,9 +7,9 @@ using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace App.Metrics.DotNetRuntime.BackgroundServices
+namespace Aragas.QServer.Metrics.BackgroundServices
 {
-    internal class MetricsCollectorService : BackgroundService
+    public class MetricsCollectorService : BackgroundService
     {
         private readonly List<IMetricsCollector> _metricsCollectors;
 
