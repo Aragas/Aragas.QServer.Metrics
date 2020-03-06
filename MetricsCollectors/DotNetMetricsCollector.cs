@@ -5,10 +5,12 @@ using App.Metrics.Gauge;
 using Microsoft.Extensions.Logging;
 
 using System;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace Aragas.QServer.Metrics.MetricsCollectors
 {
-    public sealed class DotNetMetricsCollector : IMetricsCollector
+    public sealed class DotNetMetricsCollector : BaseMetricsCollector
     {
         private readonly GaugeOptions dotnet_total_memory_bytes = new GaugeOptions()
         {
@@ -25,19 +27,21 @@ namespace Aragas.QServer.Metrics.MetricsCollectors
 
         private readonly ILogger _logger;
 
-        public DotNetMetricsCollector(ILogger<DotNetMetricsCollector> logger)
+        public DotNetMetricsCollector(IMetrics metrics, ILogger<DotNetMetricsCollector> logger) : base(metrics)
         {
             _logger = logger;
         }
 
-        public void UpdateMetrics(IMetrics metrics)
+        public override ValueTask UpdateAsync(CancellationToken stoppingToken)
         {
             for (var gen = 0; gen <= GC.MaxGeneration; gen++)
-                metrics.Measure.Counter.Increment(dotnet_collection_count, GC.CollectionCount(gen), $"gen {gen}");
+                Metrics.Measure.Counter.Increment(dotnet_collection_count, GC.CollectionCount(gen), $"gen {gen}");
 
-            metrics.Measure.Gauge.SetValue(dotnet_total_memory_bytes, GC.GetTotalMemory(false));
+            Metrics.Measure.Gauge.SetValue(dotnet_total_memory_bytes, GC.GetTotalMemory(false));
+
+            return default;
         }
 
-        public void Dispose() { }
+        public override void Dispose() { }
     }
 }

@@ -4,10 +4,12 @@ using App.Metrics.Histogram;
 using Aragas.QServer.Metrics.BackgroundServices;
 
 using Microsoft.Extensions.Logging;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace Aragas.QServer.Metrics.MetricsCollectors
 {
-    public sealed class CpuUsageMetricsCollector : IMetricsCollector
+    public sealed class CpuUsageMetricsCollector : BaseMetricsCollector
     {
         private readonly HistogramOptions process_cpu_usage_percent = new HistogramOptions()
         {
@@ -19,17 +21,19 @@ namespace Aragas.QServer.Metrics.MetricsCollectors
         private readonly ICpuUsageMonitor _cpuUsageMonitor;
         private readonly ILogger _logger;
 
-        public CpuUsageMetricsCollector(ICpuUsageMonitor cpuUsageMonitor, ILogger<CpuUsageMetricsCollector> logger)
+        public CpuUsageMetricsCollector(IMetrics metrics, ICpuUsageMonitor cpuUsageMonitor, ILogger<CpuUsageMetricsCollector> logger) : base(metrics)
         {
             _cpuUsageMonitor = cpuUsageMonitor;
             _logger = logger;
         }
 
-        public void UpdateMetrics(IMetrics metrics)
+        public override ValueTask UpdateAsync(CancellationToken stoppingToken)
         {
-            metrics.Measure.Histogram.Update(process_cpu_usage_percent, (long) _cpuUsageMonitor.CpuUsagePercent * 100 * 100);
+            Metrics.Measure.Histogram.Update(process_cpu_usage_percent, (long) _cpuUsageMonitor.CpuUsagePercent * 100 * 100);
+
+            return default;
         }
 
-        public void Dispose() { }
+        public override void Dispose() { }
     }
 }

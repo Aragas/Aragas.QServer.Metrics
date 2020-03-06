@@ -29,7 +29,7 @@ namespace Aragas.QServer.Metrics
         }
 
 
-        private readonly List<Func<IServiceProvider, IMetricsCollector>> _metricsCollectors = new List<Func<IServiceProvider, IMetricsCollector>>();
+        private readonly List<Func<IServiceProvider, BaseMetricsCollector>> _metricsCollectors = new List<Func<IServiceProvider, BaseMetricsCollector>>();
 
         public MetricsCollectorBuilder WithCpuUsageMetrics()
         {
@@ -55,13 +55,12 @@ namespace Aragas.QServer.Metrics
             return this;
         }
 
-        public MetricsCollectorBuilder WithCustomCollector(IMetricsCollector metricsCollector)
+        public MetricsCollectorBuilder WithCustomCollector(BaseMetricsCollector metricsCollector)
         {
             _metricsCollectors.Add(_ => metricsCollector);
             return this;
         }
 
-        public List<IMetricsCollector> Build(IServiceProvider serviceProvider) =>
-            _metricsCollectors.Select(mc => mc(serviceProvider)).ToList();
+        public List<BaseMetricsCollector> Build(IServiceProvider serviceProvider) => _metricsCollectors.Select(mc => mc(serviceProvider)).ToList();
     }
 }

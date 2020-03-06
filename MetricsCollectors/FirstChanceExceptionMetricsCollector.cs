@@ -5,10 +5,12 @@ using Microsoft.Extensions.Logging;
 
 using System;
 using System.Runtime.ExceptionServices;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace Aragas.QServer.Metrics.MetricsCollectors
 {
-    public sealed class FirstChanceExceptionMetricsCollector : IMetricsCollector
+    public sealed class FirstChanceExceptionMetricsCollector : BaseMetricsCollector
     {
         private readonly CounterOptions dotnet_exception_total = new CounterOptions()
         {
@@ -24,54 +26,26 @@ namespace Aragas.QServer.Metrics.MetricsCollectors
         };
 
         private readonly ILogger _logger;
-        private static readonly object _lock = new object();
-        private IMetrics _metrics;
 
-        public FirstChanceExceptionMetricsCollector(ILogger<FirstChanceExceptionMetricsCollector> logger)
+        public FirstChanceExceptionMetricsCollector(IMetrics metrics, ILogger<FirstChanceExceptionMetricsCollector> logger) : base(metrics)
         {
             _logger = logger;
             AppDomain.CurrentDomain.FirstChanceException += CurrentDomain_FirstChanceException;
         }
 
-        public void UpdateMetrics(IMetrics metrics)
-        {
-            _metrics = metrics;
-        }
-
-        private long _counter = 0;
         private void CurrentDomain_FirstChanceException(object sender, FirstChanceExceptionEventArgs e)
         {
-            if (_metrics == null)
-            {
-                lock (_lock)
-                {
-                    _counter++;
-                }
-            }
-            else
-            {
-                var tags = new MetricTags(
-                    new[] { "ExceptionType", "ExceptionMessage" },
-                    new[] { e.Exception.GetType().FullName, e.Exception.Message });
-                var exception = _metrics.Provider.Counter.Instance(dotnet_exception, tags);
-                var exceptionTotal = _metrics.Provider.Counter.Instance(dotnet_exception_total);
+            var tags = new MetricTags(new[] { "ExceptionType", "ExceptionMessage" }, new[] { e.Exception.GetType().FullName, e.Exception.Message });
+            var exception = Metrics.Provider.Counter.Instance(dotnet_exception, tags);
+            var exceptionTotal = Metrics.Provider.Counter.Instance(dotnet_exception_total);
 
-                lock (_lock)
-                {
-                    if (_counter > 0)
-                    {
-                        exception.Increment(_counter);
-                        exceptionTotal.Increment(_counter);
-                        _counter = 0;
-                    }
-                }
-
-                exception.Increment();
-                exceptionTotal.Increment();
-            }
+            exception.Increment();
+            exceptionTotal.Increment();
         }
 
-        public void Dispose()
+        public override ValueTask UpdateAsync(CancellationToken stoppingToken) => default;
+
+        public override void Dispose()
         {
             AppDomain.CurrentDomain.FirstChanceException -= CurrentDomain_FirstChanceException;
         }

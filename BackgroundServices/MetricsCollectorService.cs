@@ -3,23 +3,22 @@
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 
+using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 
 namespace Aragas.QServer.Metrics.BackgroundServices
 {
-    public class MetricsCollectorService : BackgroundService
+    public class MetricsCollectorService : BackgroundService, IAsyncDisposable
     {
-        private readonly List<IMetricsCollector> _metricsCollectors;
+        private readonly List<BaseMetricsCollector> _metricsCollectors;
 
-        private readonly IMetrics _metrics;
         private readonly ILogger _logger;
         private readonly int _delay;
 
-        public MetricsCollectorService(IMetrics metrics, ILogger<MetricsCollectorService> logger, List<IMetricsCollector> metricsCollectors, int delay = 3000)
+        public MetricsCollectorService(IMetrics metrics, ILogger<MetricsCollectorService> logger, List<BaseMetricsCollector> metricsCollectors, int delay = 3000)
         {
-            _metrics = metrics;
             _logger = logger;
             _metricsCollectors = metricsCollectors;
             _delay = delay;
@@ -27,12 +26,12 @@ namespace Aragas.QServer.Metrics.BackgroundServices
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
-            _logger.LogInformation("Starting reporting. Delay:{Delay}", GetType().Name, _delay);
+            _logger.LogInformation("Starting reporting. Delay: {Delay}", GetType().Name, _delay);
 
             while (!stoppingToken.IsCancellationRequested)
             {
                 foreach (var metricsCollector in _metricsCollectors)
-                    metricsCollector.UpdateMetrics(_metrics);
+                    await metricsCollector.UpdateAsync(stoppingToken);
 
                 await Task.Delay(_delay, stoppingToken);
             }
@@ -42,7 +41,15 @@ namespace Aragas.QServer.Metrics.BackgroundServices
         {
             foreach (var metricsCollector in _metricsCollectors)
                 metricsCollector.Dispose();
+            _metricsCollectors.Clear();
 
+            base.Dispose();
+        }
+
+        public async ValueTask DisposeAsync()
+        {
+            foreach (var metricsCollector in _metricsCollectors)
+                await metricsCollector.DisposeAsync();
             _metricsCollectors.Clear();
 
             base.Dispose();

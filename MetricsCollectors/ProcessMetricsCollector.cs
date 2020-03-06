@@ -5,10 +5,12 @@ using Microsoft.Extensions.Logging;
 
 using System;
 using System.Diagnostics;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace Aragas.QServer.Metrics.MetricsCollectors
 {
-    public sealed class ProcessMetricsCollector : IMetricsCollector
+    public sealed class ProcessMetricsCollector : BaseMetricsCollector
     {
         private readonly GaugeOptions process_start_time_milliseconds = new GaugeOptions()
         {
@@ -21,23 +23,25 @@ namespace Aragas.QServer.Metrics.MetricsCollectors
         private readonly Process _process;
         private bool _setStartTime;
 
-        public ProcessMetricsCollector(ILogger<ProcessMetricsCollector> logger)
+        public ProcessMetricsCollector(IMetrics metrics, ILogger<ProcessMetricsCollector> logger) : base(metrics)
         {
             _logger = logger;
             _process = Process.GetCurrentProcess();
         }
 
-        public void UpdateMetrics(IMetrics metrics)
+        public override ValueTask UpdateAsync(CancellationToken stoppingToken)
         {
             if (!_setStartTime)
             {
                 _process.Refresh();
-                metrics.Measure.Gauge.SetValue(process_start_time_milliseconds, new DateTimeOffset(_process.StartTime).ToUnixTimeMilliseconds());
+                Metrics.Measure.Gauge.SetValue(process_start_time_milliseconds, new DateTimeOffset(_process.StartTime).ToUnixTimeMilliseconds());
                 _setStartTime = true;
             }
+
+            return default;
         }
 
-        public void Dispose()
+        public override void Dispose()
         {
             _process.Dispose();
         }
